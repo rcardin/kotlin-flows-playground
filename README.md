@@ -1,2 +1,2 @@
-# kotlin-flows-playground
-A project containing some example of usage of Kotlin Flows
+# Kotlin Flows Playground
+A project containing some examples of usage of Kotlin Flows
