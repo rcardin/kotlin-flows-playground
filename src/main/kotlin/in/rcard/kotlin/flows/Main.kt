@@ -6,6 +6,7 @@ import `in`.rcard.kotlin.flows.Model.Id
 import `in`.rcard.kotlin.flows.Model.LastName
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.asFlow
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 
 object Model {
@@ -64,4 +65,11 @@ fun main() {
     val theMostRecentSpiderManFun: () -> Actor = { tomHolland }
 
     val theMostRecentSpiderMan: Flow<Actor> = theMostRecentSpiderManFun.asFlow()
+
+    val spiderMen: Flow<Actor> =
+        flow {
+            emit(tobeyMaguire)
+            emit(andrewGarfield)
+            emit(tomHolland)
+        }
 }
