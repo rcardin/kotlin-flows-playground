@@ -40,7 +40,7 @@ val tomHolland: Actor = Actor(Id(12), FirstName("Tom"), LastName("Holland"))
 val tobeyMaguire: Actor = Actor(Id(13), FirstName("Tobey"), LastName("Maguire"))
 val andrewGarfield: Actor = Actor(Id(14), FirstName("Andrew"), LastName("Garfield"))
 
-fun main() {
+suspend fun main() {
     val zackSnyderJusticeLeague: Flow<Actor> =
         flowOf(
             henryCavill,
@@ -84,5 +84,7 @@ fun main() {
                 emit(jasonMomoa)
             }
         }
-    println("Zack Snyder's Justice League infinite flow created")
+
+    zackSnyderJusticeLeague.collect { println(it) }
+    println("After Zack Snyder's Justice League")
 }
