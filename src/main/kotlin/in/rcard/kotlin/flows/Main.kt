@@ -72,4 +72,17 @@ fun main() {
             emit(andrewGarfield)
             emit(tomHolland)
         }
+
+    val infiniteJLFlowActors: Flow<Actor> =
+        flow {
+            while (true) {
+                emit(henryCavill)
+                emit(galGodot)
+                emit(ezraMiller)
+                emit(benFisher)
+                emit(rayHardy)
+                emit(jasonMomoa)
+            }
+        }
+    println("Zack Snyder's Justice League infinite flow created")
 }
