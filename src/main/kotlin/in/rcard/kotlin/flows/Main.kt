@@ -40,6 +40,21 @@ val tomHolland: Actor = Actor(Id(12), FirstName("Tom"), LastName("Holland"))
 val tobeyMaguire: Actor = Actor(Id(13), FirstName("Tobey"), LastName("Maguire"))
 val andrewGarfield: Actor = Actor(Id(14), FirstName("Andrew"), LastName("Garfield"))
 
+fun interface FlowCollector<T> {
+    suspend fun emit(value: T)
+}
+
+interface Flow<T> {
+    suspend fun collect(collector: FlowCollector<T>)
+}
+
+fun <T> flow(builder: suspend FlowCollector<T>.() -> Unit): `in`.rcard.kotlin.flows.Flow<T> =
+    object : `in`.rcard.kotlin.flows.Flow<T> {
+        override suspend fun collect(collector: FlowCollector<T>) {
+            builder(collector)
+        }
+    }
+
 suspend fun main() {
     val zackSnyderJusticeLeague: Flow<Actor> =
         flowOf(
@@ -85,6 +100,6 @@ suspend fun main() {
             }
         }
 
-    zackSnyderJusticeLeague.collect { println(it) }
-    println("After Zack Snyder's Justice League")
+    //    zackSnyderJusticeLeague.collect { println(it) }
+//    println("After Zack Snyder's Justice League")
 }
