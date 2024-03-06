@@ -58,6 +58,22 @@ fun <T> flow(builder: suspend FlowCollector<T>.() -> Unit): `in`.rcard.kotlin.fl
         }
     }
 
+fun <T, R> Flow<T>.map(transform: suspend (value: T) -> R): Flow<R> =
+    flow {
+        this@map.collect { value ->
+            emit(transform(value))
+        }
+    }
+
+fun <T> Flow<T>.filter(predicate: suspend (value: T) -> Boolean): Flow<T> =
+    flow {
+        this@filter.collect { value ->
+            if (predicate(value)) {
+                emit(value)
+            }
+        }
+    }
+
 suspend fun main() {
     val zackSnyderJusticeLeague: Flow<Actor> =
         flowOf(
