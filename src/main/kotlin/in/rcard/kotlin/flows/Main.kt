@@ -6,8 +6,11 @@ import `in`.rcard.kotlin.flows.Model.Id
 import `in`.rcard.kotlin.flows.Model.LastName
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.asFlow
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.mapNotNull
 
 object Model {
     @JvmInline value class Id(val id: Int)
@@ -100,6 +103,20 @@ suspend fun main() {
             }
         }
 
+    val lastNameOfJLActors: Flow<LastName> = zackSnyderJusticeLeague.map { it.lastName }
+
+    val lastNameOfJLActors5CharsLong: Flow<LastName> =
+        lastNameOfJLActors.filter { it.lastName.length == 5 }
+
+    val lastNameOfJLActors5CharsLong_v2: Flow<LastName> =
+        zackSnyderJusticeLeague.mapNotNull {
+            if (it.lastName.lastName.length == 5) {
+                it.lastName
+            } else {
+                null
+            }
+        }
+
     //    zackSnyderJusticeLeague.collect { println(it) }
-//    println("After Zack Snyder's Justice League")
+    //    println("After Zack Snyder's Justice League")
 }
