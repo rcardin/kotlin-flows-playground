@@ -4,13 +4,11 @@ import `in`.rcard.kotlin.flows.Model.Actor
 import `in`.rcard.kotlin.flows.Model.FirstName
 import `in`.rcard.kotlin.flows.Model.Id
 import `in`.rcard.kotlin.flows.Model.LastName
-import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.delay
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.flowOn
 
 object Model {
     @JvmInline value class Id(val id: Int)
@@ -72,6 +70,10 @@ fun <T> Flow<T>.filter(predicate: suspend (value: T) -> Boolean): Flow<T> =
         }
     }
 
+interface ActorRepository {
+    suspend fun findJLAActors(): Flow<Actor>
+}
+
 suspend fun main() {
     val zackSnyderJusticeLeague: Flow<Actor> =
         flowOf(
@@ -130,25 +132,53 @@ suspend fun main() {
     //                null
     //            }
     //        }
-    coroutineScope {
-        val delayedJusticeLeague: Flow<Actor> =
-            flow {
-                delay(1000)
-                emit(henryCavill)
-                delay(1000)
-                emit(galGodot)
-                delay(1000)
-                emit(ezraMiller)
-                delay(1000)
-                emit(benFisher)
-                delay(1000)
-                emit(rayHardy)
-                delay(1000)
-                emit(jasonMomoa)
-            }
+    //    withContext(CoroutineName("Main")) {
+    //        coroutineScope {
+    //            val delayedJusticeLeague: Flow<Actor> =
+    //                flow {
+    //                    println("${currentCoroutineContext()[CoroutineName]?.name} - In the flow")
+    //                    delay(1000)
+    //                    emit(henryCavill)
+    //                    delay(1000)
+    //                    emit(galGodot)
+    //                    delay(1000)
+    //                    emit(ezraMiller)
+    //                    delay(1000)
+    //                    emit(benFisher)
+    //                    delay(1000)
+    //                    emit(rayHardy)
+    //                    delay(1000)
+    //                    emit(jasonMomoa)
+    //                }
+    //
+    //            println(
+    //                "${currentCoroutineContext()[CoroutineName]?.name} - Before Zack Snyder's
+    // Justice League",
+    //            )
+    //
+    //            delayedJusticeLeague.flowOn(CoroutineName("Zack Snyder's Justice League")).collect {
+    //                println(it)
+    //            }
+    //
+    //            println(
+    //                "${currentCoroutineContext()[CoroutineName]?.name} - After Zack Snyder's Justice
+    // League",
+    //            )
+    //        }
+    //    }
 
-        println("Before Zack Snyder's Justice League")
-        delayedJusticeLeague.onEach { println(it) }.launchIn(this)
-        println("After Zack Snyder's Justice League")
-    }
+    val actorRepository: ActorRepository =
+        object : ActorRepository {
+            override suspend fun findJLAActors(): Flow<Actor> =
+                flowOf(
+                    henryCavill,
+                    galGodot,
+                    ezraMiller,
+                    benFisher,
+                    rayHardy,
+                    jasonMomoa,
+                )
+        }
+
+    actorRepository.findJLAActors().flowOn(Dispatchers.IO).collect { actor -> println(actor) }
 }
