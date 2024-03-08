@@ -4,13 +4,13 @@ import `in`.rcard.kotlin.flows.Model.Actor
 import `in`.rcard.kotlin.flows.Model.FirstName
 import `in`.rcard.kotlin.flows.Model.Id
 import `in`.rcard.kotlin.flows.Model.LastName
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.asFlow
-import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.mapNotNull
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 
 object Model {
     @JvmInline value class Id(val id: Int)
@@ -60,9 +60,7 @@ fun <T> flow(builder: suspend FlowCollector<T>.() -> Unit): `in`.rcard.kotlin.fl
 
 fun <T, R> Flow<T>.map(transform: suspend (value: T) -> R): Flow<R> =
     flow {
-        this@map.collect { value ->
-            emit(transform(value))
-        }
+        this@map.collect { value -> emit(transform(value)) }
     }
 
 fun <T> Flow<T>.filter(predicate: suspend (value: T) -> Boolean): Flow<T> =
@@ -85,54 +83,72 @@ suspend fun main() {
             jasonMomoa,
         )
 
-    val avengers: Flow<Actor> =
-        listOf(
-            robertDowneyJr,
-            chrisEvans,
-            markRuffalo,
-            chrisHemsworth,
-            scarlettJohansson,
-            jeremyRenner,
-        )
-            .asFlow()
-
-    val theMostRecentSpiderManFun: () -> Actor = { tomHolland }
-
-    val theMostRecentSpiderMan: Flow<Actor> = theMostRecentSpiderManFun.asFlow()
-
-    val spiderMen: Flow<Actor> =
-        flow {
-            emit(tobeyMaguire)
-            emit(andrewGarfield)
-            emit(tomHolland)
-        }
-
-    val infiniteJLFlowActors: Flow<Actor> =
-        flow {
-            while (true) {
+    //    val avengers: Flow<Actor> =
+    //        listOf(
+    //            robertDowneyJr,
+    //            chrisEvans,
+    //            markRuffalo,
+    //            chrisHemsworth,
+    //            scarlettJohansson,
+    //            jeremyRenner,
+    //        )
+    //            .asFlow()
+    //
+    //    val theMostRecentSpiderManFun: () -> Actor = { tomHolland }
+    //
+    //    val theMostRecentSpiderMan: Flow<Actor> = theMostRecentSpiderManFun.asFlow()
+    //
+    //    val spiderMen: Flow<Actor> =
+    //        flow {
+    //            emit(tobeyMaguire)
+    //            emit(andrewGarfield)
+    //            emit(tomHolland)
+    //        }
+    //
+    //    val infiniteJLFlowActors: Flow<Actor> =
+    //        flow {
+    //            while (true) {
+    //                emit(henryCavill)
+    //                emit(galGodot)
+    //                emit(ezraMiller)
+    //                emit(benFisher)
+    //                emit(rayHardy)
+    //                emit(jasonMomoa)
+    //            }
+    //        }
+    //
+    //    val lastNameOfJLActors: Flow<LastName> = zackSnyderJusticeLeague.map { it.lastName }
+    //
+    //    val lastNameOfJLActors5CharsLong: Flow<LastName> =
+    //        lastNameOfJLActors.filter { it.lastName.length == 5 }
+    //
+    //    val lastNameOfJLActors5CharsLong_v2: Flow<LastName> =
+    //        zackSnyderJusticeLeague.mapNotNull {
+    //            if (it.lastName.lastName.length == 5) {
+    //                it.lastName
+    //            } else {
+    //                null
+    //            }
+    //        }
+    coroutineScope {
+        val delayedJusticeLeague: Flow<Actor> =
+            flow {
+                delay(1000)
                 emit(henryCavill)
+                delay(1000)
                 emit(galGodot)
+                delay(1000)
                 emit(ezraMiller)
+                delay(1000)
                 emit(benFisher)
+                delay(1000)
                 emit(rayHardy)
+                delay(1000)
                 emit(jasonMomoa)
             }
-        }
 
-    val lastNameOfJLActors: Flow<LastName> = zackSnyderJusticeLeague.map { it.lastName }
-
-    val lastNameOfJLActors5CharsLong: Flow<LastName> =
-        lastNameOfJLActors.filter { it.lastName.length == 5 }
-
-    val lastNameOfJLActors5CharsLong_v2: Flow<LastName> =
-        zackSnyderJusticeLeague.mapNotNull {
-            if (it.lastName.lastName.length == 5) {
-                it.lastName
-            } else {
-                null
-            }
-        }
-
-    //    zackSnyderJusticeLeague.collect { println(it) }
-    //    println("After Zack Snyder's Justice League")
+        println("Before Zack Snyder's Justice League")
+        delayedJusticeLeague.onEach { println(it) }.launchIn(this)
+        println("After Zack Snyder's Justice League")
+    }
 }
