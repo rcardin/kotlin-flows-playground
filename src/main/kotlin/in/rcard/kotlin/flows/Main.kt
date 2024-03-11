@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.fold
 
 object Model {
     @JvmInline value class Id(val id: Int)
@@ -84,6 +85,9 @@ suspend fun main() {
             rayHardy,
             jasonMomoa,
         )
+
+    val numberOfJlaActors: Int =
+        zackSnyderJusticeLeague.fold(0) { currentNumOfActors, actor -> currentNumOfActors + 1 }
 
     //    val avengers: Flow<Actor> =
     //        listOf(
