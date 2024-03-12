@@ -7,11 +7,13 @@ import `in`.rcard.kotlin.flows.Model.LastName
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.count
+import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.fold
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.scan
+import kotlinx.coroutines.flow.take
 
 object Model {
     @JvmInline value class Id(val id: Int)
@@ -131,6 +133,9 @@ suspend fun main() {
         .onEach { delay(1000) }
         .scan(0) { currentNumOfActors, actor -> currentNumOfActors + 1 }
         .collect { println(it) }
+
+    infiniteJLFlowActors.take(3)
+    infiniteJLFlowActors.drop(3)
 
     //
     //    val lastNameOfJLActors: Flow<LastName> = zackSnyderJusticeLeague.map { it.lastName }
