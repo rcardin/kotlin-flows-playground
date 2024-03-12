@@ -4,12 +4,14 @@ import `in`.rcard.kotlin.flows.Model.Actor
 import `in`.rcard.kotlin.flows.Model.FirstName
 import `in`.rcard.kotlin.flows.Model.Id
 import `in`.rcard.kotlin.flows.Model.LastName
-import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.count
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.fold
+import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.scan
 
 object Model {
     @JvmInline value class Id(val id: Int)
@@ -89,6 +91,8 @@ suspend fun main() {
     val numberOfJlaActors: Int =
         zackSnyderJusticeLeague.fold(0) { currentNumOfActors, actor -> currentNumOfActors + 1 }
 
+    val numberOfJlaActors_v2: Int = zackSnyderJusticeLeague.count()
+
     //    val avengers: Flow<Actor> =
     //        listOf(
     //            robertDowneyJr,
@@ -111,17 +115,23 @@ suspend fun main() {
     //            emit(tomHolland)
     //        }
     //
-    //    val infiniteJLFlowActors: Flow<Actor> =
-    //        flow {
-    //            while (true) {
-    //                emit(henryCavill)
-    //                emit(galGodot)
-    //                emit(ezraMiller)
-    //                emit(benFisher)
-    //                emit(rayHardy)
-    //                emit(jasonMomoa)
-    //            }
-    //        }
+    val infiniteJLFlowActors: Flow<Actor> =
+        flow {
+            while (true) {
+                emit(henryCavill)
+                emit(galGodot)
+                emit(ezraMiller)
+                emit(benFisher)
+                emit(rayHardy)
+                emit(jasonMomoa)
+            }
+        }
+
+    infiniteJLFlowActors
+        .onEach { delay(1000) }
+        .scan(0) { currentNumOfActors, actor -> currentNumOfActors + 1 }
+        .collect { println(it) }
+
     //
     //    val lastNameOfJLActors: Flow<LastName> = zackSnyderJusticeLeague.map { it.lastName }
     //
@@ -171,18 +181,18 @@ suspend fun main() {
     //        }
     //    }
 
-    val actorRepository: ActorRepository =
-        object : ActorRepository {
-            override suspend fun findJLAActors(): Flow<Actor> =
-                flowOf(
-                    henryCavill,
-                    galGodot,
-                    ezraMiller,
-                    benFisher,
-                    rayHardy,
-                    jasonMomoa,
-                )
-        }
-
-    actorRepository.findJLAActors().flowOn(Dispatchers.IO).collect { actor -> println(actor) }
+    //    val actorRepository: ActorRepository =
+    //        object : ActorRepository {
+    //            override suspend fun findJLAActors(): Flow<Actor> =
+    //                flowOf(
+    //                    henryCavill,
+    //                    galGodot,
+    //                    ezraMiller,
+    //                    benFisher,
+    //                    rayHardy,
+    //                    jasonMomoa,
+    //                )
+    //        }
+    //
+    //    actorRepository.findJLAActors().flowOn(Dispatchers.IO).collect { actor -> println(actor) }
 }
