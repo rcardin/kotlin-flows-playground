@@ -6,14 +6,8 @@ import `in`.rcard.kotlin.flows.Model.Id
 import `in`.rcard.kotlin.flows.Model.LastName
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.count
-import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.flow.fold
-import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.flow.scan
-import kotlinx.coroutines.flow.take
+import kotlinx.coroutines.flow.onStart
 
 object Model {
     @JvmInline value class Id(val id: Int)
@@ -80,20 +74,20 @@ interface ActorRepository {
 }
 
 suspend fun main() {
-    val zackSnyderJusticeLeague: Flow<Actor> =
-        flowOf(
-            henryCavill,
-            galGodot,
-            ezraMiller,
-            benFisher,
-            rayHardy,
-            jasonMomoa,
-        )
-
-    val numberOfJlaActors: Int =
-        zackSnyderJusticeLeague.fold(0) { currentNumOfActors, actor -> currentNumOfActors + 1 }
-
-    val numberOfJlaActors_v2: Int = zackSnyderJusticeLeague.count()
+    //    val zackSnyderJusticeLeague: Flow<Actor> =
+    //        flowOf(
+    //            henryCavill,
+    //            galGodot,
+    //            ezraMiller,
+    //            benFisher,
+    //            rayHardy,
+    //            jasonMomoa,
+    //        )
+    //
+    //    val numberOfJlaActors: Int =
+    //        zackSnyderJusticeLeague.fold(0) { currentNumOfActors, actor -> currentNumOfActors + 1 }
+    //
+    //    val numberOfJlaActors_v2: Int = zackSnyderJusticeLeague.count()
 
     //    val avengers: Flow<Actor> =
     //        listOf(
@@ -117,25 +111,25 @@ suspend fun main() {
     //            emit(tomHolland)
     //        }
     //
-    val infiniteJLFlowActors: Flow<Actor> =
-        flow {
-            while (true) {
-                emit(henryCavill)
-                emit(galGodot)
-                emit(ezraMiller)
-                emit(benFisher)
-                emit(rayHardy)
-                emit(jasonMomoa)
-            }
-        }
-
-    infiniteJLFlowActors
-        .onEach { delay(1000) }
-        .scan(0) { currentNumOfActors, actor -> currentNumOfActors + 1 }
-        .collect { println(it) }
-
-    infiniteJLFlowActors.take(3)
-    infiniteJLFlowActors.drop(3)
+    //    val infiniteJLFlowActors: Flow<Actor> =
+    //        flow {
+    //            while (true) {
+    //                emit(henryCavill)
+    //                emit(galGodot)
+    //                emit(ezraMiller)
+    //                emit(benFisher)
+    //                emit(rayHardy)
+    //                emit(jasonMomoa)
+    //            }
+    //        }
+    //
+    //    infiniteJLFlowActors
+    //        .onEach { delay(1000) }
+    //        .scan(0) { currentNumOfActors, actor -> currentNumOfActors + 1 }
+    //        .collect { println(it) }
+    //
+    //    infiniteJLFlowActors.take(3)
+    //    infiniteJLFlowActors.drop(3)
 
     //
     //    val lastNameOfJLActors: Flow<LastName> = zackSnyderJusticeLeague.map { it.lastName }
@@ -200,4 +194,14 @@ suspend fun main() {
     //        }
     //
     //    actorRepository.findJLAActors().flowOn(Dispatchers.IO).collect { actor -> println(actor) }
+    val spiderMenWithLatency: Flow<Actor> =
+        flow {
+            delay(1000)
+            emit(tobeyMaguire)
+            emit(andrewGarfield)
+            emit(tomHolland)
+        }
+    spiderMenWithLatency
+        .onStart { emit(Actor(Id(15), FirstName("Paul"), LastName("Soles"))) }
+        .collect { println(it) }
 }
