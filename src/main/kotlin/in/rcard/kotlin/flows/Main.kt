@@ -6,9 +6,9 @@ import `in`.rcard.kotlin.flows.Model.Id
 import `in`.rcard.kotlin.flows.Model.LastName
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.onEmpty
 import kotlinx.coroutines.flow.onStart
 
 object Model {
@@ -26,7 +26,7 @@ val henryCavill = Actor(Id(1), FirstName("Henry"), LastName("Cavill"))
 val galGodot: Actor = Actor(Id(1), FirstName("Gal"), LastName("Godot"))
 val ezraMiller: Actor = Actor(Id(2), FirstName("Ezra"), LastName("Miller"))
 val benFisher: Actor = Actor(Id(3), FirstName("Ben"), LastName("Fisher"))
-val rayHardy: Actor = Actor(Id(4), FirstName("Ray"), LastName("Hardy"))
+val benAffleck: Actor = Actor(Id(4), FirstName("Ben"), LastName("Affleck"))
 val jasonMomoa: Actor = Actor(Id(5), FirstName("Jason"), LastName("Momoa"))
 
 // The Avengers
@@ -196,23 +196,33 @@ suspend fun main() {
     //        }
     //
     //    actorRepository.findJLAActors().flowOn(Dispatchers.IO).collect { actor -> println(actor) }
-    val spiderMenWithLatency: Flow<Actor> =
-        flow {
-            delay(1000)
-            emit(tobeyMaguire)
-            emit(andrewGarfield)
-            emit(tomHolland)
-        }
-    spiderMenWithLatency
-        .onStart { emit(Actor(Id(15), FirstName("Paul"), LastName("Soles"))) }
-        .collect { println(it) }
+    //    val spiderMenWithLatency: Flow<Actor> =
+    //        flow {
+    //            delay(1000)
+    //            emit(tobeyMaguire)
+    //            emit(andrewGarfield)
+    //            emit(tomHolland)
+    //        }
+    //    spiderMenWithLatency
+    //        .onStart { emit(Actor(Id(15), FirstName("Paul"), LastName("Soles"))) }
+    //        .collect { println(it) }
+    //
+    //    spiderMen.onEach { delay(1000) }.collect { println(it) }
 
-    spiderMen
-        .onEach { delay(1000) }
-        .collect { println(it) }
+    //    spiderMen
+    //        .onEach {
+    //            println(it)
+    //        }
+    //        .onCompletion { println("End of the Spider Men flow") }
+    //        .collect()
 
-    spiderMen.onEach {
-        delay(1000)
-        println(it)
-    }.collect()
+    val actorsEmptyFlow =
+        emptyFlow<Actor>()
+            .onStart { delay(1000) }
+            .onEmpty {
+                println("The flow is empty, adding some actors")
+                emit(henryCavill)
+                emit(benAffleck)
+            }
+            .collect { println(it) }
 }
