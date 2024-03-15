@@ -6,7 +6,9 @@ import `in`.rcard.kotlin.flows.Model.Id
 import `in`.rcard.kotlin.flows.Model.LastName
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
 
 object Model {
@@ -104,12 +106,12 @@ suspend fun main() {
     //
     //    val theMostRecentSpiderMan: Flow<Actor> = theMostRecentSpiderManFun.asFlow()
     //
-    //    val spiderMen: Flow<Actor> =
-    //        flow {
-    //            emit(tobeyMaguire)
-    //            emit(andrewGarfield)
-    //            emit(tomHolland)
-    //        }
+    val spiderMen: Flow<Actor> =
+        flow {
+            emit(tobeyMaguire)
+            emit(andrewGarfield)
+            emit(tomHolland)
+        }
     //
     //    val infiniteJLFlowActors: Flow<Actor> =
     //        flow {
@@ -204,4 +206,13 @@ suspend fun main() {
     spiderMenWithLatency
         .onStart { emit(Actor(Id(15), FirstName("Paul"), LastName("Soles"))) }
         .collect { println(it) }
+
+    spiderMen
+        .onEach { delay(1000) }
+        .collect { println(it) }
+
+    spiderMen.onEach {
+        delay(1000)
+        println(it)
+    }.collect()
 }
