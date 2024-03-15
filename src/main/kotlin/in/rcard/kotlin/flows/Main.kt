@@ -4,12 +4,10 @@ import `in`.rcard.kotlin.flows.Model.Actor
 import `in`.rcard.kotlin.flows.Model.FirstName
 import `in`.rcard.kotlin.flows.Model.Id
 import `in`.rcard.kotlin.flows.Model.LastName
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.onEmpty
-import kotlinx.coroutines.flow.onStart
+import java.util.Locale
 
 object Model {
     @JvmInline value class Id(val id: Int)
@@ -216,13 +214,42 @@ suspend fun main() {
     //        .onCompletion { println("End of the Spider Men flow") }
     //        .collect()
 
-    val actorsEmptyFlow =
-        emptyFlow<Actor>()
-            .onStart { delay(1000) }
-            .onEmpty {
-                println("The flow is empty, adding some actors")
-                emit(henryCavill)
-                emit(benAffleck)
+    //    val actorsEmptyFlow =
+    //        emptyFlow<Actor>()
+    //            .onStart { delay(1000) }
+    //            .onEmpty {
+    //                println("The flow is empty, adding some actors")
+    //                emit(henryCavill)
+    //                emit(benAffleck)
+    //            }
+    //            .collect { println(it) }
+
+    //    val spiderMenActorsFlowWithException =
+    //        flow {
+    //            emit(tobeyMaguire)
+    //            emit(andrewGarfield)
+    //            throw RuntimeException("An exception occurred")
+    //            emit(tomHolland)
+    //        }
+    //            .catch { ex -> emit(tomHolland) }
+    //            .onStart { println("The Spider Men flow is starting") }
+    //            .onCompletion { println("The Spider Men flow is completed") }
+    //            .collect { println(it) }
+
+    val spiderMenNames =
+        flow {
+            emit(tobeyMaguire)
+            emit(andrewGarfield)
+            emit(tomHolland)
+        }
+            .map { "${it.firstName.firstName} ${it.lastName.lastName}" }
+            .catch { ex -> emit("Tom Holland") }
+            .map {
+                if (it == "Tom Holland") {
+                    throw RuntimeException("Oooops")
+                } else {
+                    it.uppercase(Locale.getDefault())
+                }
             }
             .collect { println(it) }
 }
