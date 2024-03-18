@@ -4,10 +4,12 @@ import `in`.rcard.kotlin.flows.Model.Actor
 import `in`.rcard.kotlin.flows.Model.FirstName
 import `in`.rcard.kotlin.flows.Model.Id
 import `in`.rcard.kotlin.flows.Model.LastName
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flow
-import java.util.Locale
+import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.merge
+import kotlinx.coroutines.flow.onEach
 
 object Model {
     @JvmInline value class Id(val id: Int)
@@ -74,15 +76,28 @@ interface ActorRepository {
 }
 
 suspend fun main() {
-    //    val zackSnyderJusticeLeague: Flow<Actor> =
-    //        flowOf(
-    //            henryCavill,
-    //            galGodot,
-    //            ezraMiller,
-    //            benFisher,
-    //            rayHardy,
-    //            jasonMomoa,
-    //        )
+    val zackSnyderJusticeLeague: Flow<Actor> =
+        flowOf(
+            henryCavill,
+            galGodot,
+            ezraMiller,
+            benFisher,
+            benAffleck,
+            jasonMomoa,
+        ).onEach { delay(400) }
+
+    val avengers: Flow<Actor> =
+        flowOf(
+            robertDowneyJr,
+            chrisEvans,
+            markRuffalo,
+            chrisHemsworth,
+            scarlettJohansson,
+            jeremyRenner,
+        ).onEach { delay(200) }
+
+    merge(zackSnyderJusticeLeague, avengers).collect { println(it) }
+
     //
     //    val numberOfJlaActors: Int =
     //        zackSnyderJusticeLeague.fold(0) { currentNumOfActors, actor -> currentNumOfActors + 1 }
@@ -104,12 +119,12 @@ suspend fun main() {
     //
     //    val theMostRecentSpiderMan: Flow<Actor> = theMostRecentSpiderManFun.asFlow()
     //
-    val spiderMen: Flow<Actor> =
-        flow {
-            emit(tobeyMaguire)
-            emit(andrewGarfield)
-            emit(tomHolland)
-        }
+//    val spiderMen: Flow<Actor> =
+//        flow {
+//            emit(tobeyMaguire)
+//            emit(andrewGarfield)
+//            emit(tomHolland)
+//        }
     //
     //    val infiniteJLFlowActors: Flow<Actor> =
     //        flow {
@@ -236,20 +251,20 @@ suspend fun main() {
     //            .onCompletion { println("The Spider Men flow is completed") }
     //            .collect { println(it) }
 
-    val spiderMenNames =
-        flow {
-            emit(tobeyMaguire)
-            emit(andrewGarfield)
-            emit(tomHolland)
-        }
-            .map { "${it.firstName.firstName} ${it.lastName.lastName}" }
-            .catch { ex -> emit("Tom Holland") }
-            .map {
-                if (it == "Tom Holland") {
-                    throw RuntimeException("Oooops")
-                } else {
-                    it.uppercase(Locale.getDefault())
-                }
-            }
-            .collect { println(it) }
+//    val spiderMenNames =
+//        flow {
+//            emit(tobeyMaguire)
+//            emit(andrewGarfield)
+//            emit(tomHolland)
+//        }
+//            .map { "${it.firstName.firstName} ${it.lastName.lastName}" }
+//            .catch { ex -> emit("Tom Holland") }
+//            .map {
+//                if (it == "Tom Holland") {
+//                    throw RuntimeException("Oooops")
+//                } else {
+//                    it.uppercase(Locale.getDefault())
+//                }
+//            }
+//            .collect { println(it) }
 }
