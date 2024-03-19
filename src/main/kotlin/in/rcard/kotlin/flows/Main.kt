@@ -6,10 +6,9 @@ import `in`.rcard.kotlin.flows.Model.Id
 import `in`.rcard.kotlin.flows.Model.LastName
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.flow.merge
-import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.zip
 
 object Model {
     @JvmInline value class Id(val id: Int)
@@ -76,27 +75,27 @@ interface ActorRepository {
 }
 
 suspend fun main() {
-    val zackSnyderJusticeLeague: Flow<Actor> =
-        flowOf(
-            henryCavill,
-            galGodot,
-            ezraMiller,
-            benFisher,
-            benAffleck,
-            jasonMomoa,
-        ).onEach { delay(400) }
-
-    val avengers: Flow<Actor> =
-        flowOf(
-            robertDowneyJr,
-            chrisEvans,
-            markRuffalo,
-            chrisHemsworth,
-            scarlettJohansson,
-            jeremyRenner,
-        ).onEach { delay(200) }
-
-    merge(zackSnyderJusticeLeague, avengers).collect { println(it) }
+    //    val zackSnyderJusticeLeague: Flow<Actor> =
+    //        flowOf(
+    //            henryCavill,
+    //            galGodot,
+    //            ezraMiller,
+    //            benFisher,
+    //            benAffleck,
+    //            jasonMomoa,
+    //        ).onEach { delay(400) }
+    //
+    //    val avengers: Flow<Actor> =
+    //        flowOf(
+    //            robertDowneyJr,
+    //            chrisEvans,
+    //            markRuffalo,
+    //            chrisHemsworth,
+    //            scarlettJohansson,
+    //            jeremyRenner,
+    //        ).onEach { delay(200) }
+    //
+    //    merge(zackSnyderJusticeLeague, avengers).collect { println(it) }
 
     //
     //    val numberOfJlaActors: Int =
@@ -119,12 +118,12 @@ suspend fun main() {
     //
     //    val theMostRecentSpiderMan: Flow<Actor> = theMostRecentSpiderManFun.asFlow()
     //
-//    val spiderMen: Flow<Actor> =
-//        flow {
-//            emit(tobeyMaguire)
-//            emit(andrewGarfield)
-//            emit(tomHolland)
-//        }
+    //    val spiderMen: Flow<Actor> =
+    //        flow {
+    //            emit(tobeyMaguire)
+    //            emit(andrewGarfield)
+    //            emit(tomHolland)
+    //        }
     //
     //    val infiniteJLFlowActors: Flow<Actor> =
     //        flow {
@@ -251,20 +250,56 @@ suspend fun main() {
     //            .onCompletion { println("The Spider Men flow is completed") }
     //            .collect { println(it) }
 
-//    val spiderMenNames =
-//        flow {
-//            emit(tobeyMaguire)
-//            emit(andrewGarfield)
-//            emit(tomHolland)
-//        }
-//            .map { "${it.firstName.firstName} ${it.lastName.lastName}" }
-//            .catch { ex -> emit("Tom Holland") }
-//            .map {
-//                if (it == "Tom Holland") {
-//                    throw RuntimeException("Oooops")
-//                } else {
-//                    it.uppercase(Locale.getDefault())
-//                }
-//            }
-//            .collect { println(it) }
+    //    val spiderMenNames =
+    //        flow {
+    //            emit(tobeyMaguire)
+    //            emit(andrewGarfield)
+    //            emit(tomHolland)
+    //        }
+    //            .map { "${it.firstName.firstName} ${it.lastName.lastName}" }
+    //            .catch { ex -> emit("Tom Holland") }
+    //            .map {
+    //                if (it == "Tom Holland") {
+    //                    throw RuntimeException("Oooops")
+    //                } else {
+    //                    it.uppercase(Locale.getDefault())
+    //                }
+    //            }
+    //            .collect { println(it) }
+
+    val henryCavillBio =
+        flow {
+            delay(1000)
+            val biography =
+                """
+          Henry William Dalgliesh Cavill was born on the Bailiwick of Jersey, a British Crown dependency 
+          in the Channel Islands. His mother, Marianne (Dalgliesh), a housewife, was also born on Jersey, 
+          and is of Irish, Scottish and English ancestry...
+        """
+                    .trimIndent()
+            emit(biography)
+        }
+
+    val henryCavillMovies =
+        flow {
+            delay(2000)
+            val movies = listOf("Man of Steel", "Batman v Superman: Dawn of Justice", "Justice League")
+            emit(movies)
+        }
+
+    henryCavillBio
+        .zip(emptyFlow<List<String>>()) { bio, movies -> bio to movies }
+        .collect { (bio, movies) ->
+            println(
+                """
+                Henry Cavill
+                ------------
+                BIOGRAPHY:
+                  $bio
+                  
+                MOVIES:
+                  $movies
+                """.trimIndent(),
+            )
+        }
 }
