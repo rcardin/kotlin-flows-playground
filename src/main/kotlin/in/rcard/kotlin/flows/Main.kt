@@ -4,13 +4,10 @@ import `in`.rcard.kotlin.flows.Model.Actor
 import `in`.rcard.kotlin.flows.Model.FirstName
 import `in`.rcard.kotlin.flows.Model.Id
 import `in`.rcard.kotlin.flows.Model.LastName
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.onCompletion
-import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.flow.onStart
+import kotlinx.coroutines.flow.retry
 
 object Model {
     @JvmInline value class Id(val id: Int)
@@ -196,18 +193,33 @@ suspend fun main() {
     //        }
     //    }
 
-    //    val actorRepository: ActorRepository =
-    //        object : ActorRepository {
-    //            override suspend fun findJLAActors(): Flow<Actor> =
-    //                flowOf(
-    //                    henryCavill,
-    //                    galGodot,
-    //                    ezraMiller,
-    //                    benFisher,
-    //                    rayHardy,
-    //                    jasonMomoa,
-    //                )
-    //        }
+    val actorRepository: ActorRepository =
+        object : ActorRepository {
+            var retries = 0
+
+            override suspend fun findJLAActors(): Flow<Actor> =
+                flow {
+                    emit(henryCavill)
+                    emit(galGodot)
+                    emit(ezraMiller)
+                    if (retries == 0) {
+                        retries++
+                        throw RuntimeException("Oooops")
+                    }
+                    emit(benFisher)
+                    emit(benAffleck)
+                    emit(jasonMomoa)
+                }
+        }
+
+    actorRepository
+        .findJLAActors()
+        .retry(2) { ex ->
+            println("An exception occurred: '${ex.message}', retrying...")
+            delay(1000)
+            true
+        }
+        .collect { println(it) }
     //
     //    actorRepository.findJLAActors().flowOn(Dispatchers.IO).collect { actor -> println(actor) }
     //    val spiderMenWithLatency: Flow<Actor> =
@@ -239,21 +251,21 @@ suspend fun main() {
     //                emit(benAffleck)
     //            }
     //            .collect { println(it) }
-
-    val spiderMenActorsFlowWithException =
-        flow {
-            emit(tobeyMaguire)
-            emit(andrewGarfield)
-            emit(tomHolland)
-        }
-            .onEach {
-                if (true) throw RuntimeException("Oooops")
-                println(it)
-            }
-            .catch { ex -> println("I caught an exception!") }
-            .onStart { println("The Spider Men flow is starting") }
-            .onCompletion { println("The Spider Men flow is completed") }
-            .collect()
+    //
+    //  val spiderMenActorsFlowWithException =
+    //      flow {
+    //            emit(tobeyMaguire)
+    //            emit(andrewGarfield)
+    //            emit(tomHolland)
+    //          }
+    //          .onEach {
+    //            if (true) throw RuntimeException("Oooops")
+    //            println(it)
+    //          }
+    //          .catch { ex -> println("I caught an exception!") }
+    //          .onStart { println("The Spider Men flow is starting") }
+    //          .onCompletion { println("The Spider Men flow is completed") }
+    //          .collect()
 
     //    val spiderMenNames =
     //        flow {
