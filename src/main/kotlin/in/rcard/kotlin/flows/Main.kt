@@ -4,11 +4,13 @@ import `in`.rcard.kotlin.flows.Model.Actor
 import `in`.rcard.kotlin.flows.Model.FirstName
 import `in`.rcard.kotlin.flows.Model.Id
 import `in`.rcard.kotlin.flows.Model.LastName
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.zip
+import kotlinx.coroutines.flow.onCompletion
+import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.onStart
 
 object Model {
     @JvmInline value class Id(val id: Int)
@@ -238,17 +240,20 @@ suspend fun main() {
     //            }
     //            .collect { println(it) }
 
-    //    val spiderMenActorsFlowWithException =
-    //        flow {
-    //            emit(tobeyMaguire)
-    //            emit(andrewGarfield)
-    //            throw RuntimeException("An exception occurred")
-    //            emit(tomHolland)
-    //        }
-    //            .catch { ex -> emit(tomHolland) }
-    //            .onStart { println("The Spider Men flow is starting") }
-    //            .onCompletion { println("The Spider Men flow is completed") }
-    //            .collect { println(it) }
+    val spiderMenActorsFlowWithException =
+        flow {
+            emit(tobeyMaguire)
+            emit(andrewGarfield)
+            emit(tomHolland)
+        }
+            .onEach {
+                if (true) throw RuntimeException("Oooops")
+                println(it)
+            }
+            .catch { ex -> println("I caught an exception!") }
+            .onStart { println("The Spider Men flow is starting") }
+            .onCompletion { println("The Spider Men flow is completed") }
+            .collect()
 
     //    val spiderMenNames =
     //        flow {
@@ -267,39 +272,42 @@ suspend fun main() {
     //            }
     //            .collect { println(it) }
 
-    val henryCavillBio =
-        flow {
-            delay(1000)
-            val biography =
-                """
-          Henry William Dalgliesh Cavill was born on the Bailiwick of Jersey, a British Crown dependency 
-          in the Channel Islands. His mother, Marianne (Dalgliesh), a housewife, was also born on Jersey, 
-          and is of Irish, Scottish and English ancestry...
-        """
-                    .trimIndent()
-            emit(biography)
-        }
-
-    val henryCavillMovies =
-        flow {
-            delay(2000)
-            val movies = listOf("Man of Steel", "Batman v Superman: Dawn of Justice", "Justice League")
-            emit(movies)
-        }
-
-    henryCavillBio
-        .zip(emptyFlow<List<String>>()) { bio, movies -> bio to movies }
-        .collect { (bio, movies) ->
-            println(
-                """
-                Henry Cavill
-                ------------
-                BIOGRAPHY:
-                  $bio
-                  
-                MOVIES:
-                  $movies
-                """.trimIndent(),
-            )
-        }
+    //    val henryCavillBio =
+    //        flow {
+    //            delay(1000)
+    //            val biography =
+    //                """
+    //          Henry William Dalgliesh Cavill was born on the Bailiwick of Jersey, a British Crown
+    // dependency
+    //          in the Channel Islands. His mother, Marianne (Dalgliesh), a housewife, was also born
+    // on Jersey,
+    //          and is of Irish, Scottish and English ancestry...
+    //        """
+    //                    .trimIndent()
+    //            emit(biography)
+    //        }
+    //
+    //    val henryCavillMovies =
+    //        flow {
+    //            delay(2000)
+    //            val movies = listOf("Man of Steel", "Batman v Superman: Dawn of Justice", "Justice
+    // League")
+    //            emit(movies)
+    //        }
+    //
+    //    henryCavillBio
+    //        .zip(emptyFlow<List<String>>()) { bio, movies -> bio to movies }
+    //        .collect { (bio, movies) ->
+    //            println(
+    //                """
+    //                Henry Cavill
+    //                ------------
+    //                BIOGRAPHY:
+    //                  $bio
+    //
+    //                MOVIES:
+    //                  $movies
+    //                """.trimIndent(),
+    //            )
+    //        }
 }
