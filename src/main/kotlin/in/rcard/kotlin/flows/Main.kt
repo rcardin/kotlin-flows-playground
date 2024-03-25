@@ -7,7 +7,7 @@ import `in`.rcard.kotlin.flows.Model.LastName
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.retry
+import kotlinx.coroutines.flow.retryWhen
 
 object Model {
     @JvmInline value class Id(val id: Int)
@@ -214,9 +214,9 @@ suspend fun main() {
 
     actorRepository
         .findJLAActors()
-        .retry(2) { ex ->
-            println("An exception occurred: '${ex.message}', retrying...")
-            delay(1000)
+        .retryWhen { cause, attempt ->
+            println("An exception occurred: '${cause.message}', retry number $attempt...")
+            delay(attempt * 1000)
             true
         }
         .collect { println(it) }
