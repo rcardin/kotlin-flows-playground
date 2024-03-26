@@ -4,10 +4,12 @@ import `in`.rcard.kotlin.flows.Model.Actor
 import `in`.rcard.kotlin.flows.Model.FirstName
 import `in`.rcard.kotlin.flows.Model.Id
 import `in`.rcard.kotlin.flows.Model.LastName
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.asFlow
+import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.coroutines.flow.flatMapConcat
 import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.retryWhen
+import kotlinx.coroutines.flow.onEach
 
 object Model {
     @JvmInline value class Id(val id: Int)
@@ -71,6 +73,10 @@ fun <T> Flow<T>.filter(predicate: suspend (value: T) -> Boolean): Flow<T> =
 
 interface ActorRepository {
     suspend fun findJLAActors(): Flow<Actor>
+}
+
+interface BiographyRepository {
+    suspend fun findBio(actor: Actor): Flow<String>
 }
 
 suspend fun main() {
@@ -195,31 +201,54 @@ suspend fun main() {
 
     val actorRepository: ActorRepository =
         object : ActorRepository {
-            var retries = 0
-
             override suspend fun findJLAActors(): Flow<Actor> =
                 flow {
                     emit(henryCavill)
                     emit(galGodot)
                     emit(ezraMiller)
-                    if (retries == 0) {
-                        retries++
-                        throw RuntimeException("Oooops")
-                    }
                     emit(benFisher)
                     emit(benAffleck)
                     emit(jasonMomoa)
                 }
         }
 
+    val biographyRepository: BiographyRepository =
+        object : BiographyRepository {
+            val biosByActor =
+                mapOf(
+                    henryCavill to
+                        listOf(
+                            "1983/05/05",
+                            "Henry William Dalgliesh Cavill was born on the Bailiwick of Jersey, a British Crown",
+                            "Man of Steel, Batman v Superman: Dawn of Justice, Justice League",
+                        ),
+                    benAffleck to
+                        listOf(
+                            "1972/08/15",
+                            "Benjamin Géza Affleck-Boldt was born on August 15, 1972 in Berkeley, California.",
+                            "Argo, The Town, Good Will Hunting, Justice League",
+                        ),
+                )
+
+            override suspend fun findBio(actor: Actor): Flow<String> = biosByActor[actor]?.asFlow() ?: emptyFlow()
+        }
+
     actorRepository
         .findJLAActors()
-        .retryWhen { cause, attempt ->
-            println("An exception occurred: '${cause.message}', retry number $attempt...")
-            delay(attempt * 1000)
-            true
-        }
+        .filter { it == benAffleck || it == henryCavill }
+        .onEach { actor -> println(actor) }
+        .flatMapConcat { actor -> biographyRepository.findBio(actor) }
         .collect { println(it) }
+
+    //
+    //    actorRepository
+    //        .findJLAActors()
+    //        .retryWhen { cause, attempt ->
+    //            println("An exception occurred: '${cause.message}', retry number $attempt...")
+    //            delay(attempt * 1000)
+    //            true
+    //        }
+    //        .collect { println(it) }
     //
     //    actorRepository.findJLAActors().flowOn(Dispatchers.IO).collect { actor -> println(actor) }
     //    val spiderMenWithLatency: Flow<Actor> =
